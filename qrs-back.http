@@ -1,0 +1,6 @@
+# Cambia el puerto por el que te muestre "dotnet run" (Now listening on: http://localhost:XXXX)
+@api = http://localhost:5000
+
+### Las 4 empresas (prueba de que la base quedó bien)
+GET {{api}}/api/empresas
+Accept: application/json
