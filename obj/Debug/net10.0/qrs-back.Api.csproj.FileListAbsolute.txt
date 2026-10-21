@@ -145,3 +145,4 @@ C:\Users\Sistemas\qrs-back.Api\obj\Debug\net10.0\refint\qrs-back.Api.dll
 C:\Users\Sistemas\qrs-back.Api\obj\Debug\net10.0\qrs-back.Api.pdb
 C:\Users\Sistemas\qrs-back.Api\obj\Debug\net10.0\qrs-back.Api.genruntimeconfig.cache
 C:\Users\Sistemas\qrs-back.Api\obj\Debug\net10.0\ref\qrs-back.Api.dll
+C:\Users\Sistemas\qrs-back.Api\obj\Debug\net10.0\qrs-back.Api.sourcelink.json

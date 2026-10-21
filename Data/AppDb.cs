@@ -23,7 +23,8 @@ public class AppDb(DbContextOptions<AppDb> options) : DbContext(options)
         ConfigurarCatalogo<Proveedor>(b);
         ConfigurarCatalogo<Proceso>(b);
 
-        // Lo único que sabemos al 100 hoy. Los demás catálogos se capturan desde el panel.
+        b.Entity<Cliente>().HasData(Semilla.Clientes);
+
         b.Entity<Empresa>().HasData(
             new Empresa { Id = 1, Nombre = "American Polo" },
             new Empresa { Id = 2, Nombre = "Cartoonia" },
@@ -85,6 +86,7 @@ public class AppDb(DbContextOptions<AppDb> options) : DbContext(options)
         b.Entity<LoteSegundas>(e =>
         {
             e.Property(x => x.Motivo).HasMaxLength(200);
+            e.Property(x => x.Talla).HasMaxLength(10);
             e.HasOne(x => x.Orden).WithMany(o => o.LotesSegundas).HasForeignKey(x => x.OrdenId).OnDelete(DeleteBehavior.Cascade);
             e.ToTable(t => t.HasCheckConstraint("CK_LoteSegundas", "Cantidad > 0 AND PrecioCentavos >= 0"));
         });

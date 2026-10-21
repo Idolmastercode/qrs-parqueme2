@@ -1,4 +1,5 @@
 using qrs_back.Data;
+using qrs_back.Endpoints;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
@@ -34,5 +35,7 @@ app.MapGet("/api/empresas", async (AppDb db) =>
         .OrderBy(e => e.Nombre)
         .Select(e => new { e.Id, e.Nombre })
         .ToListAsync());
+
+app.MapCatalogos();
 
 app.Run();

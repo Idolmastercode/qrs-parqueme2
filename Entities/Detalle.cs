@@ -33,5 +33,6 @@ public class LoteSegundas
 
     public int Cantidad { get; set; }
     public long PrecioCentavos { get; set; }
+    public string? Talla { get; set; }
     public string? Motivo { get; set; }
 }

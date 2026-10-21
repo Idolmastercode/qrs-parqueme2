@@ -38,6 +38,116 @@ namespace qrs_back.Api.Migrations
                         .IsUnique();
 
                     b.ToTable("Clientes");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Activo = true,
+                            Nombre = "Aero"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Activo = true,
+                            Nombre = "Andrea"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Activo = true,
+                            Nombre = "C&A"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Activo = true,
+                            Nombre = "CCP"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Activo = true,
+                            Nombre = "Chedraui"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Activo = true,
+                            Nombre = "Control"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Activo = true,
+                            Nombre = "Coppel"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Activo = true,
+                            Nombre = "ImportaCop"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Activo = true,
+                            Nombre = "Liverpool"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Activo = true,
+                            Nombre = "Lob"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            Activo = true,
+                            Nombre = "Malayerba"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            Activo = true,
+                            Nombre = "Nautica"
+                        },
+                        new
+                        {
+                            Id = 13,
+                            Activo = true,
+                            Nombre = "OfficeMax"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            Activo = true,
+                            Nombre = "Optima"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            Activo = true,
+                            Nombre = "Palacio de Hierro"
+                        },
+                        new
+                        {
+                            Id = 16,
+                            Activo = true,
+                            Nombre = "Shasa"
+                        },
+                        new
+                        {
+                            Id = 17,
+                            Activo = true,
+                            Nombre = "Suburbia"
+                        },
+                        new
+                        {
+                            Id = 18,
+                            Activo = true,
+                            Nombre = "Walmart"
+                        });
                 });
 
             modelBuilder.Entity("qrs_back.Entities.Empresa", b =>
@@ -107,6 +217,10 @@ namespace qrs_back.Api.Migrations
 
                     b.Property<long>("PrecioCentavos")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("Talla")
+                        .HasMaxLength(10)
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
