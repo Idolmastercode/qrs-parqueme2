@@ -37,5 +37,7 @@ app.MapGet("/api/empresas", async (AppDb db) =>
         .ToListAsync());
 
 app.MapCatalogos();
+app.MapProducciones();
+app.MapOrdenes();
 
 app.Run();

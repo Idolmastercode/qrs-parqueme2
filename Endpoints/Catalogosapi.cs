@@ -49,7 +49,7 @@ public static partial class CatalogosApi
 
             // La columna es NOCASE: "coppel" choca con "Coppel"
             if (await tabla(db).AnyAsync(x => x.Nombre == nombre))
-                return Results.Conflict(new { error = $"Ya existe el {singular} {nombre}." });
+                return Resp.Choca($"Ya existe el {singular} {nombre}.");
 
             var item = new T { Nombre = nombre, Activo = cuerpo.Activo ?? true };
             tabla(db).Add(item);
@@ -67,7 +67,7 @@ public static partial class CatalogosApi
                 var nombre = Limpiar(cuerpo.Nombre);
                 if (nombre is null) return NombreInvalido();
                 if (await tabla(db).AnyAsync(x => x.Id != id && x.Nombre == nombre))
-                    return Results.Conflict(new { error = $"Ya existe el {singular} {nombre}." });
+                    return Resp.Choca($"Ya existe el {singular} {nombre}.");
                 item.Nombre = nombre;
             }
             if (cuerpo.Activo is bool activo) item.Activo = activo;
@@ -82,11 +82,7 @@ public static partial class CatalogosApi
 
     private static CatalogoDto Dto(Catalogo x) => new(x.Id, x.Nombre, x.Activo);
 
-    private static IResult NombreInvalido() =>
-        Results.ValidationProblem(new Dictionary<string, string[]>
-        {
-            ["nombre"] = ["Escribe un nombre de hasta 80 caracteres."],
-        });
+    private static IResult NombreInvalido() => Resp.Mal("Escribe un nombre de hasta 80 caracteres.");
 
     /// <summary>Quita espacios de más ("  Palacio   de Hierro " → "Palacio de Hierro"). Null si queda vacío o muy largo.</summary>
     private static string? Limpiar(string? s)
