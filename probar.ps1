@@ -1,13 +1,4 @@
 ﻿# =====================================================================
-#  Carga datos de prueba en la API y revisa que responda como debe.
-#
-#  1. En una terminal:  dotnet run
-#  2. En otra, dentro de la carpeta del proyecto:
-#        powershell -ExecutionPolicy Bypass -File .\probar.ps1
-#
-#  Si lo corres otra vez no duplica nada: detecta que ya están y solo repite las revisiones.
-#  Para empezar de cero: para la API, borra qrs.db y corre "dotnet ef database update".
-# =====================================================================
 
 $ErrorActionPreference = "Stop"
 $api = "http://localhost:5087"
