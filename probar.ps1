@@ -1,6 +1,4 @@
-﻿# =====================================================================
-
-$ErrorActionPreference = "Stop"
+﻿$ErrorActionPreference = "Stop"
 $api = "http://localhost:5087"
 
 function Api($metodo, $ruta, $cuerpo = $null) {

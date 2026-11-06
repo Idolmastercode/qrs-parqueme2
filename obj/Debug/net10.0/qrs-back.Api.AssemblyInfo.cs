@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("qrs-back.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+51acf4ad801bb991e0c6db8d345a65798cc674cf")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6417725f67f14ddf427475b158b1a27451652f99")]
 [assembly: System.Reflection.AssemblyProductAttribute("qrs-back.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("qrs-back.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
