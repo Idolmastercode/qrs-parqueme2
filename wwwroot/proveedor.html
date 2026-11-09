@@ -572,6 +572,23 @@ async function enviar(e) {
 }
 
 cargar();
+
+// Actualización automática cada 10 s: si confirman la cita (o la cambian), la página cambia sola.
+// No corre mientras está capturando, para no borrarle lo que lleva escrito.
+setInterval(async () => {
+  if (document.visibilityState !== "visible" || !orden || document.getElementById("forma")) return;
+  try {
+    const r = await fetch(URL_API, { headers: { Accept: "application/json" } });
+    if (!r.ok) return;
+    const nueva = await r.json();
+    if (JSON.stringify(nueva) !== JSON.stringify(orden)) {
+      orden = nueva;
+      pintar();
+    }
+  } catch {
+    // sin conexión: se intenta en la siguiente vuelta
+  }
+}, 10000);
 </script>
 </body>
 </html>

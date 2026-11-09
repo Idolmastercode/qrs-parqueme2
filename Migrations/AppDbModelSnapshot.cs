@@ -44,7 +44,7 @@ namespace qrs_back.Api.Migrations
                         {
                             Id = 1,
                             Activo = true,
-                            Nombre = "Aero"
+                            Nombre = "Aéropostale"
                         },
                         new
                         {
@@ -98,7 +98,7 @@ namespace qrs_back.Api.Migrations
                         {
                             Id = 10,
                             Activo = true,
-                            Nombre = "Lob"
+                            Nombre = "LOB"
                         },
                         new
                         {
@@ -366,6 +366,32 @@ namespace qrs_back.Api.Migrations
                         .IsUnique();
 
                     b.ToTable("Procesos");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Activo = true,
+                            Nombre = "Bordado"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Activo = true,
+                            Nombre = "Confección"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Activo = true,
+                            Nombre = "Estampado"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Activo = true,
+                            Nombre = "Piedra"
+                        });
                 });
 
             modelBuilder.Entity("qrs_back.Entities.Produccion", b =>
@@ -437,6 +463,311 @@ namespace qrs_back.Api.Migrations
                         .IsUnique();
 
                     b.ToTable("Proveedores");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Activo = true,
+                            Nombre = "Mara"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Activo = true,
+                            Nombre = "Lalo Silverato"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Activo = true,
+                            Nombre = "Pulpo"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Activo = true,
+                            Nombre = "José Onofre"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Activo = true,
+                            Nombre = "Karina"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Activo = true,
+                            Nombre = "Eva"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Activo = true,
+                            Nombre = "Tamayo"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Activo = true,
+                            Nombre = "José Contreras"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Activo = true,
+                            Nombre = "Fabián"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Activo = true,
+                            Nombre = "Lety"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            Activo = true,
+                            Nombre = "Celia"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            Activo = true,
+                            Nombre = "Manuel"
+                        },
+                        new
+                        {
+                            Id = 13,
+                            Activo = true,
+                            Nombre = "Luis"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            Activo = true,
+                            Nombre = "Javier"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            Activo = true,
+                            Nombre = "Laura"
+                        },
+                        new
+                        {
+                            Id = 16,
+                            Activo = true,
+                            Nombre = "María Ahumada"
+                        },
+                        new
+                        {
+                            Id = 17,
+                            Activo = true,
+                            Nombre = "Juan Sosa"
+                        },
+                        new
+                        {
+                            Id = 18,
+                            Activo = true,
+                            Nombre = "Lulú Arenas"
+                        },
+                        new
+                        {
+                            Id = 19,
+                            Activo = true,
+                            Nombre = "Blanca Mendoza"
+                        },
+                        new
+                        {
+                            Id = 20,
+                            Activo = true,
+                            Nombre = "Alejandro"
+                        },
+                        new
+                        {
+                            Id = 21,
+                            Activo = true,
+                            Nombre = "Raquel"
+                        },
+                        new
+                        {
+                            Id = 22,
+                            Activo = true,
+                            Nombre = "Juan Lemus"
+                        },
+                        new
+                        {
+                            Id = 23,
+                            Activo = true,
+                            Nombre = "Miguel García"
+                        },
+                        new
+                        {
+                            Id = 24,
+                            Activo = true,
+                            Nombre = "Juan Calderón"
+                        },
+                        new
+                        {
+                            Id = 25,
+                            Activo = true,
+                            Nombre = "Artz"
+                        },
+                        new
+                        {
+                            Id = 26,
+                            Activo = true,
+                            Nombre = "Paw Printex"
+                        });
+                });
+
+            modelBuilder.Entity("qrs_back.Entities.ProveedorProceso", b =>
+                {
+                    b.Property<int>("ProveedorId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ProcesoId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("ProveedorId", "ProcesoId");
+
+                    b.HasIndex("ProcesoId");
+
+                    b.ToTable("ProveedorProcesos");
+
+                    b.HasData(
+                        new
+                        {
+                            ProveedorId = 1,
+                            ProcesoId = 1
+                        },
+                        new
+                        {
+                            ProveedorId = 2,
+                            ProcesoId = 4
+                        },
+                        new
+                        {
+                            ProveedorId = 3,
+                            ProcesoId = 3
+                        },
+                        new
+                        {
+                            ProveedorId = 4,
+                            ProcesoId = 2
+                        },
+                        new
+                        {
+                            ProveedorId = 5,
+                            ProcesoId = 2
+                        },
+                        new
+                        {
+                            ProveedorId = 6,
+                            ProcesoId = 2
+                        },
+                        new
+                        {
+                            ProveedorId = 7,
+                            ProcesoId = 2
+                        },
+                        new
+                        {
+                            ProveedorId = 8,
+                            ProcesoId = 2
+                        },
+                        new
+                        {
+                            ProveedorId = 9,
+                            ProcesoId = 2
+                        },
+                        new
+                        {
+                            ProveedorId = 10,
+                            ProcesoId = 2
+                        },
+                        new
+                        {
+                            ProveedorId = 11,
+                            ProcesoId = 2
+                        },
+                        new
+                        {
+                            ProveedorId = 12,
+                            ProcesoId = 2
+                        },
+                        new
+                        {
+                            ProveedorId = 13,
+                            ProcesoId = 2
+                        },
+                        new
+                        {
+                            ProveedorId = 14,
+                            ProcesoId = 2
+                        },
+                        new
+                        {
+                            ProveedorId = 15,
+                            ProcesoId = 2
+                        },
+                        new
+                        {
+                            ProveedorId = 16,
+                            ProcesoId = 2
+                        },
+                        new
+                        {
+                            ProveedorId = 17,
+                            ProcesoId = 2
+                        },
+                        new
+                        {
+                            ProveedorId = 18,
+                            ProcesoId = 2
+                        },
+                        new
+                        {
+                            ProveedorId = 19,
+                            ProcesoId = 2
+                        },
+                        new
+                        {
+                            ProveedorId = 20,
+                            ProcesoId = 2
+                        },
+                        new
+                        {
+                            ProveedorId = 21,
+                            ProcesoId = 2
+                        },
+                        new
+                        {
+                            ProveedorId = 22,
+                            ProcesoId = 1
+                        },
+                        new
+                        {
+                            ProveedorId = 23,
+                            ProcesoId = 1
+                        },
+                        new
+                        {
+                            ProveedorId = 24,
+                            ProcesoId = 1
+                        },
+                        new
+                        {
+                            ProveedorId = 25,
+                            ProcesoId = 3
+                        },
+                        new
+                        {
+                            ProveedorId = 26,
+                            ProcesoId = 3
+                        });
                 });
 
             modelBuilder.Entity("qrs_back.Entities.LoteSegundas", b =>
@@ -507,6 +838,25 @@ namespace qrs_back.Api.Migrations
                     b.Navigation("Empresa");
                 });
 
+            modelBuilder.Entity("qrs_back.Entities.ProveedorProceso", b =>
+                {
+                    b.HasOne("qrs_back.Entities.Proceso", "Proceso")
+                        .WithMany()
+                        .HasForeignKey("ProcesoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("qrs_back.Entities.Proveedor", "Proveedor")
+                        .WithMany("Procesos")
+                        .HasForeignKey("ProveedorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Proceso");
+
+                    b.Navigation("Proveedor");
+                });
+
             modelBuilder.Entity("qrs_back.Entities.Orden", b =>
                 {
                     b.Navigation("LotesSegundas");
@@ -517,6 +867,11 @@ namespace qrs_back.Api.Migrations
             modelBuilder.Entity("qrs_back.Entities.Produccion", b =>
                 {
                     b.Navigation("Ordenes");
+                });
+
+            modelBuilder.Entity("qrs_back.Entities.Proveedor", b =>
+                {
+                    b.Navigation("Procesos");
                 });
 #pragma warning restore 612, 618
         }
