@@ -226,11 +226,11 @@ public static class OrdenesApi
         o.Tallas.OrderBy(t => t.Posicion).Select(t => new TallaDto(t.Talla, t.Pedidas, t.Primeras, t.Segundas)).ToList(),
         o.LotesSegundas.OrderBy(l => l.Id).Select(l => new LoteDto(l.Cantidad, l.PrecioCentavos, l.Talla, l.Motivo)).ToList());
 
-    private static string? Cita(DateTime? d) => d?.ToString("yyyy-MM-dd'T'HH:mm", CultureInfo.InvariantCulture);
+    internal static string? Cita(DateTime? d) => d?.ToString("yyyy-MM-dd'T'HH:mm", CultureInfo.InvariantCulture);
 
     private static readonly string[] FormatosCita = ["yyyy-MM-dd'T'HH:mm", "yyyy-MM-dd'T'HH:mm:ss"];
 
-    private static DateTime? LeerCita(string s) =>
+    internal static DateTime? LeerCita(string s) =>
         DateTime.TryParseExact(s.Trim(), FormatosCita, CultureInfo.InvariantCulture, DateTimeStyles.None, out var f)
             ? f
             : null;
@@ -269,7 +269,7 @@ public static class OrdenesApi
     }
 
     /// <summary>Igual que erroresLotes del front: por talla, no puede haber más con precio especial que segundas.</summary>
-    private static string? RevisarLotes(List<LoteDto> lotes, List<TallaDto> tallas)
+    internal static string? RevisarLotes(List<LoteDto> lotes, List<TallaDto> tallas)
     {
         var segundasPorTalla = tallas.ToDictionary(t => t.Talla, t => t.Segundas, StringComparer.Ordinal);
         foreach (var l in lotes)
@@ -294,7 +294,7 @@ public static class OrdenesApi
         return null;
     }
 
-    private static string? RevisarComentario(string? s) =>
+    internal static string? RevisarComentario(string? s) =>
         s is { Length: > 1000 } ? "El comentario puede tener hasta 1000 caracteres." : null;
 
     // =====================================================================
@@ -311,7 +311,7 @@ public static class OrdenesApi
             Motivo = string.IsNullOrWhiteSpace(l.Motivo) ? null : l.Motivo.Trim(),
         }).ToList();
 
-    private static string? LimpiarComentario(string? s) => string.IsNullOrWhiteSpace(s) ? null : s.Trim();
+    internal static string? LimpiarComentario(string? s) => string.IsNullOrWhiteSpace(s) ? null : s.Trim();
 
     /// <summary>
     /// Actualiza las tallas en su lugar (por nombre) en vez de borrar y recrear,

@@ -10,6 +10,11 @@ public record CatalogoDto(int Id, string Nombre, bool Activo);
 /// <summary>Cuerpo para crear o editar. En PUT, lo que venga null no se toca.</summary>
 public record GuardarCatalogo(string? Nombre, bool? Activo);
 
+/// <summary>Proveedor con los procesos que hace (procesoIds).</summary>
+public record ProveedorDto(int Id, string Nombre, bool Activo, List<int> ProcesoIds);
+
+public record ProcesosDeProveedor(List<int>? ProcesoIds);
+
 public static partial class CatalogosApi
 {
     public static void MapCatalogos(this IEndpointRouteBuilder app)
@@ -21,7 +26,7 @@ public static partial class CatalogosApi
         {
             empresas = await Lista(db.Empresas),
             clientes = await Lista(db.Clientes),
-            proveedores = await Lista(db.Proveedores),
+            proveedores = await Proveedores(db),
             procesos = await Lista(db.Procesos),
         });
 
@@ -29,7 +34,31 @@ public static partial class CatalogosApi
         Mapear<Cliente>(app, "clientes", "cliente", db => db.Clientes);
         Mapear<Proveedor>(app, "proveedores", "proveedor", db => db.Proveedores);
         Mapear<Proceso>(app, "procesos", "proceso", db => db.Procesos);
+
+        // Qué procesos hace un proveedor (reemplaza la lista completa): { procesoIds: [1, 3] }
+        app.MapPut("/api/proveedores/{id:int}/procesos", async (int id, ProcesosDeProveedor cuerpo, AppDb db) =>
+        {
+            var prov = await db.Proveedores.Include(p => p.Procesos).FirstOrDefaultAsync(p => p.Id == id);
+            if (prov is null) return Results.NotFound();
+
+            var ids = (cuerpo.ProcesoIds ?? []).Distinct().ToList();
+            var existen = await db.Procesos.Where(p => ids.Contains(p.Id)).Select(p => p.Id).ToListAsync();
+            if (existen.Count != ids.Count) return Resp.Mal("Alguno de esos procesos no existe.");
+
+            prov.Procesos.RemoveAll(x => !ids.Contains(x.ProcesoId));
+            foreach (var pid in ids.Where(pid => prov.Procesos.All(x => x.ProcesoId != pid)))
+                prov.Procesos.Add(new ProveedorProceso { ProveedorId = id, ProcesoId = pid });
+
+            await db.SaveChangesAsync();
+            return Results.Ok(new ProveedorDto(prov.Id, prov.Nombre, prov.Activo, prov.Procesos.Select(x => x.ProcesoId).Order().ToList()));
+        });
     }
+
+    private static Task<List<ProveedorDto>> Proveedores(AppDb db) =>
+        db.Proveedores
+            .OrderBy(x => x.Nombre)
+            .Select(x => new ProveedorDto(x.Id, x.Nombre, x.Activo, x.Procesos.Select(pp => pp.ProcesoId).OrderBy(i => i).ToList()))
+            .ToListAsync();
 
     // GET /api/{ruta}       lista
     // POST /api/{ruta}      { nombre }            → 201, 400 si viene vacío, 409 si ya existe

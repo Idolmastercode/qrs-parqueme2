@@ -10,6 +10,7 @@ public class AppDb(DbContextOptions<AppDb> options) : DbContext(options)
     public DbSet<Cliente> Clientes => Set<Cliente>();
     public DbSet<Proveedor> Proveedores => Set<Proveedor>();
     public DbSet<Proceso> Procesos => Set<Proceso>();
+    public DbSet<ProveedorProceso> ProveedorProcesos => Set<ProveedorProceso>();
     public DbSet<Produccion> Producciones => Set<Produccion>();
     public DbSet<Orden> Ordenes => Set<Orden>();
     public DbSet<OrdenTalla> OrdenTallas => Set<OrdenTalla>();
@@ -24,6 +25,16 @@ public class AppDb(DbContextOptions<AppDb> options) : DbContext(options)
         ConfigurarCatalogo<Proceso>(b);
 
         b.Entity<Cliente>().HasData(Semilla.Clientes);
+        b.Entity<Proceso>().HasData(Semilla.Procesos);
+        b.Entity<Proveedor>().HasData(Semilla.Proveedores);
+
+        b.Entity<ProveedorProceso>(e =>
+        {
+            e.HasKey(x => new { x.ProveedorId, x.ProcesoId });
+            e.HasOne(x => x.Proveedor).WithMany(p => p.Procesos).HasForeignKey(x => x.ProveedorId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(x => x.Proceso).WithMany().HasForeignKey(x => x.ProcesoId).OnDelete(DeleteBehavior.Cascade);
+            e.HasData(Semilla.ProveedorProcesos);
+        });
 
         b.Entity<Empresa>().HasData(
             new Empresa { Id = 1, Nombre = "American Polo" },

@@ -1,3 +1,5 @@
+using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.RateLimiting;
 using qrs_back.Data;
 using qrs_back.Endpoints;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +21,16 @@ builder.Services.AddCors(o => o.AddPolicy("panel", p => p
     .AllowAnyHeader()
     .AllowAnyMethod()));
 
+// Página pública del proveedor: máximo 30 llamadas por minuto por IP,
+// para que nadie pueda ponerse a probar enlaces al azar.
+builder.Services.AddRateLimiter(o =>
+{
+    o.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    o.AddPolicy("publico", ctx => RateLimitPartition.GetFixedWindowLimiter(
+        ctx.Connection.RemoteIpAddress?.ToString() ?? "desconocida",
+        _ => new FixedWindowRateLimiterOptions { PermitLimit = 30, Window = TimeSpan.FromMinutes(1) }));
+});
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -27,6 +39,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("panel");
+app.UseRateLimiter();
 
 // Prueba de vida: si esto responde con las 4 empresas, la base y la migración están bien.
 app.MapGet("/api/empresas", async (AppDb db) =>
@@ -39,5 +52,11 @@ app.MapGet("/api/empresas", async (AppDb db) =>
 app.MapCatalogos();
 app.MapProducciones();
 app.MapOrdenes();
+app.MapPublico();
+
+// Página del proveedor: el QR apunta aquí (en producción: https://pedidos.cartoonia.mx/t/{token}).
+// Es un solo archivo en wwwroot; la página lee el token de la dirección y llama a /api/t/{token}.
+var paginaProveedor = Path.Combine(builder.Environment.ContentRootPath, "wwwroot", "proveedor.html");
+app.MapGet("/t/{token}", () => Results.File(paginaProveedor, "text/html; charset=utf-8"));
 
 app.Run();
