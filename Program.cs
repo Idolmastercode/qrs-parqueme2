@@ -15,9 +15,13 @@ builder.Services.AddDbContext<AppDb>(o => o
 
 builder.Services.AddOpenApi();
 
-// Permite que el panel en React (Vite) llame a la API mientras desarrollas
+// Quién puede abrir el panel (React/Vite) y llamar a la API.
+// En desarrollo: tu compu y cualquier compu de la red local (192.168.x.x, 10.x.x.x) en el puerto 5173,
+// para probar desde otra máquina de la oficina. En producción se cierra al dominio del panel.
 builder.Services.AddCors(o => o.AddPolicy("panel", p => p
-    .WithOrigins("http://localhost:5173")
+    .SetIsOriginAllowed(origen => builder.Environment.IsDevelopment()
+        ? EsRedLocal(origen)
+        : origen == "https://sistema.cartoonia.mx")
     .AllowAnyHeader()
     .AllowAnyMethod()));
 
@@ -60,3 +64,11 @@ var paginaProveedor = Path.Combine(builder.Environment.ContentRootPath, "wwwroot
 app.MapGet("/t/{token}", () => Results.File(paginaProveedor, "text/html; charset=utf-8"));
 
 app.Run();
+
+static bool EsRedLocal(string origen)
+{
+    if (!Uri.TryCreate(origen, UriKind.Absolute, out var u)) return false;
+    var h = u.Host;
+    return h == "localhost" || h == "127.0.0.1" || h.StartsWith("192.168.") || h.StartsWith("10.")
+        || (h.StartsWith("172.") && int.TryParse(h.Split('.')[1], out var b) && b >= 16 && b <= 31);
+}
