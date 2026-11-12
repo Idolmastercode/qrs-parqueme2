@@ -9,15 +9,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<AppDb>(o => o
     .UseSqlite(builder.Configuration.GetConnectionString("Qrs"))
-    // Tallas y lotes dependen de Orden, que tiene filtro de borrado lógico. Es intencional: si la orden
-    // está oculta, sus tallas también. EF lo advierte por si fuera un error; aquí no lo es.
+
     .ConfigureWarnings(w => w.Ignore(CoreEventId.PossibleIncorrectRequiredNavigationWithQueryFilterInteractionWarning)));
 
 builder.Services.AddOpenApi();
 
-// Quién puede abrir el panel (React/Vite) y llamar a la API.
-// En desarrollo: tu compu y cualquier compu de la red local (192.168.x.x, 10.x.x.x) en el puerto 5173,
-// para probar desde otra máquina de la oficina. En producción se cierra al dominio del panel.
 builder.Services.AddCors(o => o.AddPolicy("panel", p => p
     .SetIsOriginAllowed(origen => builder.Environment.IsDevelopment()
         ? EsRedLocal(origen)
@@ -25,8 +21,6 @@ builder.Services.AddCors(o => o.AddPolicy("panel", p => p
     .AllowAnyHeader()
     .AllowAnyMethod()));
 
-// Página pública del proveedor: máximo 30 llamadas por minuto por IP,
-// para que nadie pueda ponerse a probar enlaces al azar.
 builder.Services.AddRateLimiter(o =>
 {
     o.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
@@ -39,7 +33,7 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi(); // documento en /openapi/v1.json
+    app.MapOpenApi();
 }
 
 app.UseCors("panel");
