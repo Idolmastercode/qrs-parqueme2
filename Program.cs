@@ -39,7 +39,6 @@ if (app.Environment.IsDevelopment())
 app.UseCors("panel");
 app.UseRateLimiter();
 
-// Prueba de vida: si esto responde con las 4 empresas, la base y la migración están bien.
 app.MapGet("/api/empresas", async (AppDb db) =>
     await db.Empresas
         .Where(e => e.Activo)
@@ -52,8 +51,6 @@ app.MapProducciones();
 app.MapOrdenes();
 app.MapPublico();
 
-// Página del proveedor: el QR apunta aquí (en producción: https://pedidos.cartoonia.mx/t/{token}).
-// Es un solo archivo en wwwroot; la página lee el token de la dirección y llama a /api/t/{token}.
 var paginaProveedor = Path.Combine(builder.Environment.ContentRootPath, "wwwroot", "proveedor.html");
 app.MapGet("/t/{token}", () => Results.File(paginaProveedor, "text/html; charset=utf-8"));
 
