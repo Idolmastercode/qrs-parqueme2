@@ -262,6 +262,8 @@ public static class OrdenesApi
             if (t.Talla.Length == 0 || t.Talla.Length > 10) return "Cada talla necesita un nombre de hasta 10 caracteres.";
             if (!vistas.Add(t.Talla)) return $"La talla {t.Talla} está repetida.";
             if (t.Pedidas < 0 || t.Primeras < 0 || t.Segundas < 0) return $"Talla {t.Talla}: no puede haber cantidades negativas.";
+            // Pedir 0 de una talla no tiene sentido (y el proveedor no podría mandar nada)
+            if (t.Pedidas == 0) return $"Talla {t.Talla}: pon cuántas piezas se piden, o quita esa talla.";
             if (t.Primeras + t.Segundas > t.Pedidas)
                 return $"Talla {t.Talla}: primeras + segundas ({t.Primeras + t.Segundas}) pasan de las pedidas ({t.Pedidas}).";
         }
