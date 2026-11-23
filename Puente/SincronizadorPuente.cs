@@ -114,8 +114,10 @@ public class SincronizadorPuente(
                 .Include(x => x.LotesSegundas)
                 .FirstOrDefaultAsync(x => x.Token == e.Token && x.Id == e.OrdenId, ct);
 
-            // Si ya no existe, le quitaron el enlace o ya tiene cita confirmada aquí: se ignora (pero se confirma)
-            if (orden is not null && orden.CitaConfirmada is null)
+            // Si ya no existe o le quitaron el enlace: se ignora (pero se confirma).
+            // Si aquí ya confirmaron la cita mientras el envío venía en camino, se guarda igual su conteo
+            // y su propuesta como referencia; la cita confirmada no se toca.
+            if (orden is not null)
             {
                 foreach (var t in orden.Tallas)
                 {
