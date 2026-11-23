@@ -2,6 +2,7 @@ using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.RateLimiting;
 using qrs_back.Data;
 using qrs_back.Endpoints;
+using qrs_back.Puente;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
@@ -9,18 +10,27 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<AppDb>(o => o
     .UseSqlite(builder.Configuration.GetConnectionString("Qrs"))
-
+    // Tallas y lotes dependen de Orden, que tiene filtro de borrado lógico. Es intencional: si la orden
+    // está oculta, sus tallas también. EF lo advierte por si fuera un error; aquí no lo es.
     .ConfigureWarnings(w => w.Ignore(CoreEventId.PossibleIncorrectRequiredNavigationWithQueryFilterInteractionWarning)));
 
 builder.Services.AddOpenApi();
 
+// Quién puede abrir el panel (React) y llamar a la API: solo compus de la red de la oficina
+// (192.168.x.x, 10.x.x.x…). El panel vive en el servidor local, nunca en internet.
 builder.Services.AddCors(o => o.AddPolicy("panel", p => p
-    .SetIsOriginAllowed(origen => builder.Environment.IsDevelopment()
-        ? EsRedLocal(origen)
-        : origen == "https://sistema.cartoonia.mx")
+    .SetIsOriginAllowed(EsRedLocal)
     .AllowAnyHeader()
     .AllowAnyMethod()));
 
+// Sincronización con la página pública de los QR (el "puente" en IONOS).
+// Se configura en appsettings.json → "Puente". Sin configurar, no hace nada.
+builder.Services.Configure<OpcionesPuente>(builder.Configuration.GetSection("Puente"));
+builder.Services.AddHttpClient("puente", c => c.Timeout = TimeSpan.FromSeconds(20));
+builder.Services.AddHostedService<SincronizadorPuente>();
+
+// Página pública del proveedor: máximo 30 llamadas por minuto por IP,
+// para que nadie pueda ponerse a probar enlaces al azar.
 builder.Services.AddRateLimiter(o =>
 {
     o.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
@@ -33,12 +43,13 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.MapOpenApi(); // documento en /openapi/v1.json
 }
 
 app.UseCors("panel");
 app.UseRateLimiter();
 
+// Prueba de vida: si esto responde con las 4 empresas, la base y la migración están bien.
 app.MapGet("/api/empresas", async (AppDb db) =>
     await db.Empresas
         .Where(e => e.Activo)
@@ -51,6 +62,8 @@ app.MapProducciones();
 app.MapOrdenes();
 app.MapPublico();
 
+// Página del proveedor: el QR apunta aquí (en producción: https://pedidos.cartoonia.mx/t/{token}).
+// Es un solo archivo en wwwroot; la página lee el token de la dirección y llama a /api/t/{token}.
 var paginaProveedor = Path.Combine(builder.Environment.ContentRootPath, "wwwroot", "proveedor.html");
 app.MapGet("/t/{token}", () => Results.File(paginaProveedor, "text/html; charset=utf-8"));
 
