@@ -15,6 +15,7 @@ public class AppDb(DbContextOptions<AppDb> options) : DbContext(options)
     public DbSet<Orden> Ordenes => Set<Orden>();
     public DbSet<OrdenTalla> OrdenTallas => Set<OrdenTalla>();
     public DbSet<LoteSegundas> LotesSegundas => Set<LoteSegundas>();
+    public DbSet<CambioOrden> CambiosOrden => Set<CambioOrden>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -64,6 +65,8 @@ public class AppDb(DbContextOptions<AppDb> options) : DbContext(options)
         {
             e.Property(x => x.Comentario).HasMaxLength(1000);
             e.Property(x => x.Token).HasMaxLength(32);
+            e.Property(x => x.RecibioNombre).HasMaxLength(80);
+            e.Property(x => x.NotaEntrega).HasMaxLength(500);
 
             e.HasIndex(x => x.Token).IsUnique();
             e.HasIndex(x => x.Np);
@@ -100,6 +103,15 @@ public class AppDb(DbContextOptions<AppDb> options) : DbContext(options)
             e.Property(x => x.Talla).HasMaxLength(10);
             e.HasOne(x => x.Orden).WithMany(o => o.LotesSegundas).HasForeignKey(x => x.OrdenId).OnDelete(DeleteBehavior.Cascade);
             e.ToTable(t => t.HasCheckConstraint("CK_LoteSegundas", "Cantidad > 0 AND PrecioCentavos >= 0"));
+        });
+
+        // ---------- Bitácora ----------
+        b.Entity<CambioOrden>(e =>
+        {
+            e.Property(x => x.Accion).HasMaxLength(30).IsRequired();
+            e.Property(x => x.Quien).HasMaxLength(80);
+            e.Property(x => x.Motivo).HasMaxLength(500);
+            e.HasIndex(x => x.OrdenId);
         });
 
         // ---------- Fechas UTC ----------

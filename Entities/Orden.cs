@@ -6,14 +6,15 @@ namespace qrs_back.Entities;
 /// con el mismo proceso dentro de la misma producción.
 ///
 /// El estado NO se guarda, se calcula:
-///   sin Token                         → Creada
-///   Token y sin RecibidoEn            → Enviada
-///   RecibidoEn y sin CitaConfirmada   → Recibida
-///   CitaConfirmada en el futuro       → Programada
-///   CitaConfirmada ya pasó            → Cerrada (si se reagenda, se reabre sola)
+///   sin Token                                  → Sin enlace
+///   Token y sin RecibidoEn                     → Esperando proveedor
+///   RecibidoEn y sin CitaConfirmada            → Por agendar
+///   CitaConfirmada (antes del día)             → Programada
+///   CitaConfirmada (ya es el día o pasó)       → Por recibir
+///   EntregadaEn                                → Entregada (cerrada: ya no se edita)
 ///
 /// Importe = primeras × Precio + segundas en lotes × su precio + segundas sin lote × PrecioSegunda.
-/// Los faltantes no se pagan.
+/// Los faltantes no se pagan. Lo que se paga es lo RECIBIDO (la entrega), no lo que declaró el proveedor.
 /// </summary>
 public class Orden : IConFechas, IBorrable
 {
@@ -22,7 +23,11 @@ public class Orden : IConFechas, IBorrable
     public int ProduccionId { get; set; }
     public Produccion Produccion { get; set; } = null!;
 
-    /// <summary>Número de SAP de esta orden. No es único en la base porque una orden de SAP puede repartirse entre varios proveedores.</summary>
+    /// <summary>
+    /// Número de SAP de esta orden. Único dentro de la empresa (aunque un proceso se reparta,
+    /// cada parte lleva su propio NP). Como la empresa vive en la producción, SQLite no puede
+    /// forzarlo con un índice: se valida en la API al crear/editar.
+    /// </summary>
     public long Np { get; set; }
 
     public int ProcesoId { get; set; }
@@ -50,6 +55,18 @@ public class Orden : IConFechas, IBorrable
     // ---- Cita (hora local de México) ----
     public DateTime? CitaPropuesta { get; set; }
     public DateTime? CitaConfirmada { get; set; }
+
+    // ---- Entrega (lo que de verdad llegó y se paga) ----
+    /// <summary>Cuándo se registró la entrega. Con esto la orden queda cerrada y ya no se edita.</summary>
+    public DateTime? EntregadaEn { get; set; }
+    /// <summary>Quién recibió la mercancía.</summary>
+    public string? RecibioNombre { get; set; }
+    public string? NotaEntrega { get; set; }
+    /// <summary>Copia (JSON) de lo que había declarado el proveedor al momento de recibir, para comparar después.</summary>
+    public string? DeclaradoJson { get; set; }
+
+    /// <summary>Última vez que se usó "Corregir pedido": se descartó la respuesta del proveedor y tiene que volver a enviarla.</summary>
+    public DateTime? PedidoCorregidoEn { get; set; }
 
     public DateTime? EliminadoEn { get; set; }
     public DateTime CreadoEn { get; set; }

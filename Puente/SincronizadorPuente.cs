@@ -27,7 +27,8 @@ public class OpcionesPuente
 public record TallaPublica(string Talla, int Pedidas, int Primeras, int Segundas);
 public record OrdenPublica(
     string Token, int OrdenId, string Empresa, long Op, long Operacion, string Modelo, string Proceso, string Proveedor,
-    List<TallaPublica> Tallas, string Comentario, string? CitaPropuesta, string? CitaConfirmada, string? RecibidoEn);
+    List<TallaPublica> Tallas, string Comentario, string? CitaPropuesta, string? CitaConfirmada, string? RecibidoEn,
+    string? EntregadaEn, string? CorregidoEn);
 
 // Lo que se baja: lo que mandó el proveedor desde su celular
 public record ConteoPublico(string Talla, int Primeras, int Segundas);
@@ -114,10 +115,14 @@ public class SincronizadorPuente(
                 .Include(x => x.LotesSegundas)
                 .FirstOrDefaultAsync(x => x.Token == e.Token && x.Id == e.OrdenId, ct);
 
-            // Si ya no existe o le quitaron el enlace: se ignora (pero se confirma).
+            // Se ignora (pero se confirma) si: ya no existe, le quitaron el enlace, ya se registró la entrega,
+            // o el envío es de antes de un "Corregir pedido" (era sobre el pedido viejo).
             // Si aquí ya confirmaron la cita mientras el envío venía en camino, se guarda igual su conteo
             // y su propuesta como referencia; la cita confirmada no se toca.
-            if (orden is not null)
+            var recibido = DateTime.Parse(e.RecibidoEn, CultureInfo.InvariantCulture,
+                DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal);
+            if (orden is not null && orden.EntregadaEn is null
+                && (orden.PedidoCorregidoEn is null || recibido > orden.PedidoCorregidoEn))
             {
                 foreach (var t in orden.Tallas)
                 {
@@ -128,8 +133,7 @@ public class SincronizadorPuente(
                 }
                 orden.Comentario = OrdenesApi.LimpiarComentario(e.Comentario);
                 orden.CitaPropuesta = OrdenesApi.LeerCita(e.CitaPropuesta) ?? orden.CitaPropuesta;
-                orden.RecibidoEn = DateTime.Parse(e.RecibidoEn, CultureInfo.InvariantCulture,
-                    DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal);
+                orden.RecibidoEn = recibido;
 
                 // Igual que en la página: si los precios especiales ya no cuadran con el conteo nuevo, se quitan
                 var tallas = orden.Tallas.Select(t => new TallaDto(t.Talla, t.Pedidas, t.Primeras, t.Segundas)).ToList();
@@ -164,14 +168,14 @@ public class SincronizadorPuente(
                 x.Token, x.Id, Empresa = x.Produccion.Empresa.Nombre, x.Produccion.Op, x.Np, x.Produccion.Modelo,
                 Proceso = x.Proceso.Nombre, Proveedor = x.Proveedor.Nombre,
                 Tallas = x.Tallas.OrderBy(t => t.Posicion).Select(t => new TallaPublica(t.Talla, t.Pedidas, t.Primeras, t.Segundas)).ToList(),
-                x.Comentario, x.CitaPropuesta, x.CitaConfirmada, x.RecibidoEn,
+                x.Comentario, x.CitaPropuesta, x.CitaConfirmada, x.RecibidoEn, x.EntregadaEn, x.PedidoCorregidoEn,
             })
             .ToListAsync(ct);
 
         var lista = filas.Select(x => new OrdenPublica(
             x.Token!, x.Id, x.Empresa, x.Op, x.Np, x.Modelo, x.Proceso, x.Proveedor, x.Tallas, x.Comentario ?? "",
             OrdenesApi.Cita(x.CitaPropuesta), OrdenesApi.Cita(x.CitaConfirmada),
-            x.RecibidoEn?.ToUniversalTime().ToString("yyyy-MM-dd'T'HH:mm:ss'Z'", CultureInfo.InvariantCulture))).ToList();
+            Utc(x.RecibidoEn), Utc(x.EntregadaEn), Utc(x.PedidoCorregidoEn))).ToList();
 
         // Solo se sube si algo cambió (o cada 5 minutos, por si el puente perdió sus datos)
         var json = JsonSerializer.Serialize(lista, Json);
@@ -185,6 +189,9 @@ public class SincronizadorPuente(
         var res = await r.Content.ReadFromJsonAsync<RespuestaSubida>(Json, ct);
         log.LogDebug("Puente: {N} órdenes publicadas, {B} quitadas", res?.Ordenes, res?.Borradas);
     }
+
+    private static string? Utc(DateTime? d) =>
+        d?.ToUniversalTime().ToString("yyyy-MM-dd'T'HH:mm:ss'Z'", CultureInfo.InvariantCulture);
 
     private static async Task Revisar(HttpResponseMessage r, CancellationToken ct)
     {
