@@ -60,6 +60,7 @@ app.MapGet("/api/empresas", async (AppDb db) =>
 app.MapCatalogos();
 app.MapProducciones();
 app.MapOrdenes();
+app.MapDev();
 app.MapPublico();
 
 // Página del proveedor: el QR apunta aquí (en producción: https://pedidos.cartoonia.mx/t/{token}).

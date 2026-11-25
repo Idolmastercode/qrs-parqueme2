@@ -122,6 +122,7 @@ public static class OrdenesApi
             };
             AplicarTallas(orden, tallas);
             db.Ordenes.Add(orden);
+            await Aprender(db, orden.ProveedorId, orden.ProcesoId);
             await db.SaveChangesAsync();
 
             return Results.Created($"/api/ordenes/{orden.Id}", new
@@ -173,6 +174,7 @@ public static class OrdenesApi
             o.PrecioSegundaCentavos = precioSegunda;
             if (c.Comentario is not null) o.Comentario = LimpiarComentario(c.Comentario);
             if (c.Tallas is not null) AplicarTallas(o, tallas);
+            await Aprender(db, proveedorId, procesoId);
             if (c.LotesSegundas is not null)
             {
                 o.LotesSegundas.Clear();
@@ -477,8 +479,20 @@ public static class OrdenesApi
     //  Limpieza y aplicación
     // =====================================================================
 
+    // " 16 eg " → "16EG" (igual que el catálogo de tallas)
     private static List<TallaDto> LimpiarTallas(List<TallaDto>? tallas) =>
-        (tallas ?? []).Select(t => t with { Talla = (t.Talla ?? "").Trim().ToUpperInvariant() }).ToList();
+        (tallas ?? []).Select(t => t with { Talla = string.Concat((t.Talla ?? "").Where(ch => !char.IsWhiteSpace(ch))).ToUpperInvariant() }).ToList();
+
+    /// <summary>
+    /// Solo informativo (Ajustes): el proveedor queda marcado como que hace ese proceso.
+    /// No limita nada: al capturar siempre salen todos.
+    /// </summary>
+    private static async Task Aprender(AppDb db, int proveedorId, int procesoId)
+    {
+        if (!await db.ProveedorProcesos.AnyAsync(x => x.ProveedorId == proveedorId && x.ProcesoId == procesoId)
+            && !db.ProveedorProcesos.Local.Any(x => x.ProveedorId == proveedorId && x.ProcesoId == procesoId))
+            db.ProveedorProcesos.Add(new ProveedorProceso { ProveedorId = proveedorId, ProcesoId = procesoId });
+    }
 
     private static List<LoteDto> LimpiarLotes(List<LoteDto> lotes) =>
         lotes.Select(l => l with
