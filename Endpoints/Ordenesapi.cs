@@ -36,7 +36,7 @@ public record CitaIn(string? CitaConfirmada);
 /// <summary>Lo que de verdad llegó, por talla.</summary>
 public record ConteoRecibido(string? Talla, int Primeras, int Segundas);
 
-/// <summary>Registrar la entrega: conteo real, precios (opcionales) y quién recibió.</summary>
+/// <summary>Registrar la entrega: conteo real (los faltantes no se pagan), precios y nota. Todo menos el conteo es opcional.</summary>
 public record EntregaIn(
     List<ConteoRecibido>? Tallas, long? PrecioCentavos, long? PrecioSegundaCentavos,
     List<LoteDto>? LotesSegundas, string? Recibio, string? Nota);
@@ -254,8 +254,9 @@ public static class OrdenesApi
             if (o is null) return Results.NotFound();
             if (o.EntregadaEn is not null) return Resp.Choca("Esta entrega ya se registró.");
 
-            var recibio = c.Recibio?.Trim();
-            if (string.IsNullOrEmpty(recibio) || recibio.Length > 80) return Resp.Mal("Escribe quién recibió.");
+            // Quién recibió: opcional
+            var recibio = string.IsNullOrWhiteSpace(c.Recibio) ? null : c.Recibio.Trim();
+            if (recibio is { Length: > 80 }) return Resp.Mal("El nombre de quien recibió puede tener hasta 80 caracteres.");
             var nota = string.IsNullOrWhiteSpace(c.Nota) ? null : c.Nota.Trim();
             if (nota is { Length: > 500 }) return Resp.Mal("La nota puede tener hasta 500 caracteres.");
             var precio = c.PrecioCentavos ?? o.PrecioCentavos;
@@ -311,15 +312,14 @@ public static class OrdenesApi
             return Results.Ok(Out(o));
         });
 
-        // ---------- Reabrir una entrega ya registrada (con motivo, queda en la bitácora) ----------
+        // ---------- Reabrir una entrega ya registrada (motivo opcional, queda en la bitácora) ----------
         g.MapPost("/{id:int}/reabrir-entrega", async (int id, ReaperturaIn c, AppDb db) =>
         {
             var o = await ConDetalle(db).FirstOrDefaultAsync(x => x.Id == id);
             if (o is null) return Results.NotFound();
             if (o.EntregadaEn is null) return Resp.Choca("Esta entrega no está registrada.");
-            var motivo = c.Motivo?.Trim();
-            if (string.IsNullOrEmpty(motivo) || motivo.Length < 5) return Resp.Mal("Escribe el motivo.");
-            if (motivo.Length > 500) return Resp.Mal("El motivo puede tener hasta 500 caracteres.");
+            var motivo = string.IsNullOrWhiteSpace(c.Motivo) ? null : c.Motivo.Trim();
+            if (motivo is { Length: > 500 }) return Resp.Mal("El motivo puede tener hasta 500 caracteres.");
 
             db.CambiosOrden.Add(new CambioOrden
             {

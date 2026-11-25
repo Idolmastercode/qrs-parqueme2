@@ -17,6 +17,41 @@ namespace qrs_back.Api.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.13");
 
+            modelBuilder.Entity("qrs_back.Entities.CambioOrden", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Accion")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Detalle")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Motivo")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("OrdenId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Quien")
+                        .HasMaxLength(80)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("RegistradoEn")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrdenId");
+
+                    b.ToTable("CambiosOrden");
+                });
+
             modelBuilder.Entity("qrs_back.Entities.Cliente", b =>
                 {
                     b.Property<int>("Id")
@@ -254,11 +289,24 @@ namespace qrs_back.Api.Migrations
                     b.Property<DateTime>("CreadoEn")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("DeclaradoJson")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime?>("EliminadoEn")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("EntregadaEn")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NotaEntrega")
+                        .HasMaxLength(500)
                         .HasColumnType("TEXT");
 
                     b.Property<long>("Np")
                         .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("PedidoCorregidoEn")
+                        .HasColumnType("TEXT");
 
                     b.Property<long>("PrecioCentavos")
                         .HasColumnType("INTEGER");
@@ -276,6 +324,10 @@ namespace qrs_back.Api.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime?>("RecibidoEn")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("RecibioNombre")
+                        .HasMaxLength(80)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Token")
